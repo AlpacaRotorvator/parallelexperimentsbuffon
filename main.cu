@@ -24,7 +24,8 @@ int main (int argc, char ** argv)
 
     piest = compute_naive(grid, block, device, iterationsPerThread);
 
-    std::cout << 1/piest << std::endl;
+    reportResults(piest, iterationsPerThread, grid.x, block.x, &deviceProp);
+    
     return 0;
 }
 
