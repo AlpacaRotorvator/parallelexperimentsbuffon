@@ -1,5 +1,5 @@
 #include <cuda_runtime.h>
-#include "misc.hxx"
+#include "misc.hu"
 
 
 int main (int argc, char ** argv) {
