@@ -1,8 +1,7 @@
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
+#include <math_constants.h>
 #include "naive_kernel.hu"
-
-__device__ constexpr double pi2() { return acos(-1) / 2; };
 
 __global__ void initRNG(curandState * const rngStates, const unsigned int seed)
 {
@@ -15,11 +14,11 @@ __global__ void initRNG(curandState * const rngStates, const unsigned int seed)
 
 __device__ void draw(double &angle, double &distance, curandState &state)
 {
-    angle = cos(curand_uniform(&state) * pi2());
+    angle = cos(curand_uniform(&state) * CUDART_PIO2);
     distance = curand_uniform(&state) * 2;
 }
 
-__device__ double reduce_sum(unsigned int in)
+__device__ unsigned int reduce_sum(unsigned int in)
 {
     extern __shared__ unsigned int sdata[];
 
@@ -44,7 +43,7 @@ __device__ double reduce_sum(unsigned int in)
     return sdata[0];
 }
 
-__global__ void naive_kernel (double *const results,
+__global__ void naive_kernel (unsigned int *const results,
 			      curandState *const rngStates,
 			      const unsigned int numSims)
 {
@@ -61,8 +60,8 @@ __global__ void naive_kernel (double *const results,
 
     for (unsigned int i = 0; i < numSims ; i++)
     {
-        precision angle;
-        precision distance;
+        double angle;
+        double distance;
         draw(angle, distance, localState);
 
         if (distance <= angle)
@@ -77,6 +76,6 @@ __global__ void naive_kernel (double *const results,
     // Store the result
     if (threadIdx.x == 0)
     {
-        results[bid] = pointsInside / numSims;
+        results[bid] = pointsInside;
     }
 }
