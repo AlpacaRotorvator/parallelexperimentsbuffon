@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <unistd.h>
 #include <cuda_runtime.h>
 
 void handleCudaErrors (cudaError_t cudaResult, std::string msg) {
@@ -11,7 +12,7 @@ void handleCudaErrors (cudaError_t cudaResult, std::string msg) {
 }
 
 void printHelpmsg () {
-    std::string helpMsg = "Usage: buffoncuda [-n <NUMINT>] [-b <BLOCKNUM>] [-t <TNUM>]";
+    std::string helpMsg = "Usage: buffoncuda [-n <NUMINT>] [-b <BLOCKNUM>] [-t <TNUM>]\n";
     std::cout << helpMsg;
 }
 
@@ -19,6 +20,7 @@ void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
 		cudaDeviceProp * const deviceProp, unsigned int * numBlocks,
 		unsigned int *  threadsPerBlock) {
     char cmdFlag;
+    int candidate = 0;
 
     while((cmdFlag = getopt(argc, argv, "n:b:t:h")) != -1) {
 	switch (cmdFlag)
@@ -27,7 +29,7 @@ void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
 		*iterationsPerThread = atoi(optarg);
 		break;
 	    case 'b':
-		int candidate = atoi(optarg);
+		candidate = atoi(optarg);
 		if (candidate <= 0) {
 		    throw std::runtime_error("Number of blocks must be greater or equal than zero");
 		}
@@ -36,11 +38,11 @@ void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
 		}
 		break;
 	    case 't':
-		int candidate = atoi(optarg);
-		if (candidtate <= 0) {
+		candidate = atoi(optarg);
+		if (candidate <= 0) {
 		    throw std::runtime_error("Number of threads per block must be greater or equal than zero.");
 		}
-		else if ((n & (n - 1)) != 0) {
+		else if ((candidate & (candidate - 1)) != 0) {
 		    throw std::runtime_error("Number of threads per block must be a power of two(for efficient reduction).");
 		}
 		else {
