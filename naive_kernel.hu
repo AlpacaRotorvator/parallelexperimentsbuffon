@@ -1,0 +1,12 @@
+#include <cuda_runtime.h>
+#include <curand_kernel.h>
+
+__global__ void initRNG(curandState * const rngStates, const unsigned int seed);
+
+__device__ void draw(double &angle, double &distance, curandState &state);
+
+__device__ double reduce_sum(unsigned int in);
+
+__global__ void naive_kernel (double *const results,
+			      curandState *const rngStates,
+			      const unsigned int numSims);
