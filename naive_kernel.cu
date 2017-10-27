@@ -1,7 +1,6 @@
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 #include "naive_kernel.hu"
-#include "misc.h"
 
 __device__ constexpr double pi2() { return acos(-1) / 2; };
 
