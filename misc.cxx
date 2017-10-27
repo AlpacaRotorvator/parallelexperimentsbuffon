@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <cuda_runtime.h>
 
-void handleCudaErrors (cudaError_t cudaResult, std::string msg = "Error: ") {
+void handleCudaErrors (cudaError_t cudaResult, std::string msg) {
     if (cudaResult != cudaSuccess) {
 	msg += cudaGetErrorString(cudaResult);
 	throw std::runtime_error(msg);

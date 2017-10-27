@@ -1,7 +1,7 @@
 #include <string>
 #include <cuda_runtime.h>
 
-void handleCudaErrors (cudaError_t cudaResult, std::string msg);
+void handleCudaErrors (cudaError_t cudaResult, std::string msg = "Error :");
 
 void printHelpmsg ();
 
