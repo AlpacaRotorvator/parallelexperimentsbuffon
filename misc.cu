@@ -12,7 +12,8 @@ void handleCudaErrors (cudaError_t cudaResult, std::string msg) {
 }
 
 void printHelpmsg () {
-    std::string helpMsg = "Usage: buffoncuda [-n <NUMINT>] [-b <BLOCKNUM>] [-t <TNUM>]\n";
+    std::string helpMsg = "Usage: buffoncuda [-n <NUMINT>] [-b <BLOCKNUM>] [-t <TNUM>]\n\n";
+    std::string helpMsg += "Please remember me to finish writing this if you feel frustrated by the lack of proper documentation.\n";
     std::cout << helpMsg;
 }
 
