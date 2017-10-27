@@ -1,0 +1,23 @@
+#Cmake files
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+build
+DartConfiguration.tcl
+
+#Some annoying temp file from god knows what
+*#*
+
+#Misc stuff
+*.out
+*.o
+*.dot
+
+#Emacs temp files
+*~
