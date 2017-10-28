@@ -36,15 +36,15 @@ double compute_naive(dim3 grid, dim3 block, unsigned int device,
     curandState *d_rngStates = 0;
     handleCudaErrors(cudaMalloc((void **) &d_rngStates, grid.x * block.x * sizeof(curandState)));
 
-    double *d_res = 0;
-    handleCudaErrors(cudaMalloc((void **) &d_res, grid.x * sizeof(double)));
+    float *d_res = 0;
+    handleCudaErrors(cudaMalloc((void **) &d_res, grid.x * sizeof(float)));
 
     initRNG<<<grid, block>>>(d_rngStates, time(NULL));
 
     naive_kernel<<<grid, block,  block.x * sizeof(unsigned int)>>>(d_res, d_rngStates, iterationsperThread);
 
-    std::vector<double> res(grid.x);
-    handleCudaErrors(cudaMemcpy(&res[0], d_res, grid.x * sizeof(double),
+    std::vector<float> res(grid.x);
+    handleCudaErrors(cudaMemcpy(&res[0], d_res, grid.x * sizeof(float),
 				cudaMemcpyDeviceToHost));
 
     double estimate = std::accumulate(res.begin(), res.end(), 0.0);

@@ -12,10 +12,10 @@ __global__ void initRNG(curandState * const rngStates, const unsigned int seed)
     curand_init(seed, tid, 0, &rngStates[tid]);
 }
 
-__device__ void draw(double &angle, double &distance, curandState &state)
+__device__ void draw(float &angle, float &distance, curandState &state)
 {
-    angle = cos(curand_uniform_double(&state) * CUDART_PIO2);
-    distance = curand_uniform_double(&state) * 2.0;
+    angle = cosf(curand_uniform(&state) * CUDART_PIO2_F);
+    distance = curand_uniform(&state) * 2.0f;
 }
 
 __device__ unsigned int reduce_sum(unsigned int in)
@@ -43,7 +43,7 @@ __device__ unsigned int reduce_sum(unsigned int in)
     return sdata[0];
 }
 
-__global__ void naive_kernel (double *const results,
+__global__ void naive_kernel (float *const results,
 			      curandState *const rngStates,
 			      const unsigned int numSims)
 {
@@ -60,8 +60,8 @@ __global__ void naive_kernel (double *const results,
 
     for (unsigned int i = 0; i < numSims ; i++)
     {
-        double angle;
-        double distance;
+        float angle;
+        float distance;
         draw(angle, distance, localState);
 
         if (distance <= angle)
@@ -76,7 +76,7 @@ __global__ void naive_kernel (double *const results,
     // Store the result
     if (threadIdx.x == 0)
     {
-        results[bid] = (static_cast<double>(numSims) * blockDim.x) /
-	    (static_cast<double>(pointsInside) * gridDim.x);
+        results[bid] = (static_cast<float>(numSims) * blockDim.x) /
+	    (static_cast<float>(pointsInside) * gridDim.x);
     }
 }
