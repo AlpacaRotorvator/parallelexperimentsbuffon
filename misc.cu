@@ -9,15 +9,17 @@
 
 using namespace std;
 
-void handleCudaErrors (cudaError_t cudaResult, string msg) {
+void handleCudaErrors (cudaError_t cudaResult, string msg)
+{
     if (cudaResult != cudaSuccess) {
 	msg += cudaGetErrorString(cudaResult);
 	throw runtime_error(msg);
     }
 }
 
-void printHelpmsg () {
-    string helpMsg = "Usage: buffoncuda [-n <NUMINT>] [-b <BLOCKNUM>] [-t <TNUM>]\n\n";
+void printHelpmsg ()
+{
+    string helpMsg = "Usage: buffoncuda [-n <NUMINT>] [-b <BLOCKNUM>] [-t <TNUM>] [-k <KERNID>]\n\n";
     helpMsg += "Please remember me to finish writing this if you feel frustrated by the lack of proper documentation.\n";
     cout << helpMsg;
     exit(0);
@@ -25,11 +27,12 @@ void printHelpmsg () {
 
 void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
 		cudaDeviceProp * const deviceProp, unsigned int * numBlocks,
-		unsigned int *  threadsPerBlock) {
+		unsigned int *  threadsPerBlock, unsigned int * kernel)
+{
     char cmdFlag;
     int candidate = 0;
 
-    while((cmdFlag = getopt(argc, argv, "n:b:t:h")) != -1) {
+    while((cmdFlag = getopt(argc, argv, "n:b:t:k:h")) != -1) {
 	switch (cmdFlag)
 	    {
 	    case 'n':
@@ -54,6 +57,15 @@ void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
 		}
 		else {
 		    *threadsPerBlock = candidate;
+		}
+		break;
+	    case 'k':
+		candidate = atoi(optarg);
+		if (candidate < 0 || candidate > 0) {
+		    throw runtime_error("Kernel number must be 0, 1 or 2");
+		}
+		else {
+		    *kernel = candidate;
 		}
 		break;
 	    case 'h':

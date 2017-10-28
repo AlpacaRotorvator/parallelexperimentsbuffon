@@ -10,6 +10,7 @@ double compute_naive(dim3 grid, dim3 block, unsigned int device,
 
 int main (int argc, char ** argv)
 {
+    unsigned int kernel = 0;
     double piest;
     cudaDeviceProp deviceProp;
     unsigned int device = 0;
@@ -19,10 +20,14 @@ int main (int argc, char ** argv)
     dim3 grid = 16;
     dim3 block = 64;
 
-    parseArgs(argc, argv, &iterationsPerThread, &deviceProp, &grid.x, &block.x);
+    parseArgs(argc, argv, &iterationsPerThread, &deviceProp,
+	      &grid.x, &block.x, &kernel);
 
-    piest = compute_naive(grid, block, device, iterationsPerThread);
-
+    switch (kernel) {
+    case 0:
+	piest = compute_naive(grid, block, device, iterationsPerThread);
+    }
+    
     reportResults(piest, iterationsPerThread, grid.x, block.x, &deviceProp);
     
     return 0;

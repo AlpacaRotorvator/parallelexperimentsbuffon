@@ -5,9 +5,9 @@ void handleCudaErrors (cudaError_t cudaResult, std::string msg = "Error :");
 
 void printHelpmsg ();
 
-void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
+void parseArgs (int argc, char ** argv, unsigned int * iterationsPerThread,
 		cudaDeviceProp * const deviceProp, unsigned int * numBlocks,
-		unsigned int *  threadsPerBlock);
+		unsigned int * threadsPerBlock, unsigned int * kernel);
 
 void reportResults (double estimate, unsigned int itpT,  unsigned int gridS,
 		    unsigned int blockS, cudaDeviceProp *const deviceProp);
