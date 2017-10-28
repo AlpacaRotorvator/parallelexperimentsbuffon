@@ -66,7 +66,6 @@ void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
 void reportResults (double estimate, unsigned int itpT,  unsigned int gridS,
 		    unsigned int blockS, cudaDeviceProp *const deviceProp)
 {
-    estimate = 1/ estimate;
     double abserr = abs(estimate - CUDART_PI);
     double relerr = abserr / CUDART_PI;
 

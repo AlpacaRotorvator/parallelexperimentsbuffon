@@ -43,7 +43,7 @@ __device__ unsigned int reduce_sum(unsigned int in)
     return sdata[0];
 }
 
-__global__ void naive_kernel (unsigned int *const results,
+__global__ void naive_kernel (double *const results,
 			      curandState *const rngStates,
 			      const unsigned int numSims)
 {
@@ -76,6 +76,7 @@ __global__ void naive_kernel (unsigned int *const results,
     // Store the result
     if (threadIdx.x == 0)
     {
-        results[bid] = pointsInside;
+        results[bid] = (static_cast<double>(numSims) * blockDim.x) /
+	    (static_cast<double>(pointsInside) * gridDim.x);
     }
 }

@@ -1,7 +1,6 @@
 #include <ctime>
 #include <vector>
 #include <numeric>
-#include <iostream>
 #include <cuda_runtime.h>
 #include "naive_kernel.hu"
 #include "misc.hu"
@@ -37,21 +36,18 @@ double compute_naive(dim3 grid, dim3 block, unsigned int device,
     curandState *d_rngStates = 0;
     handleCudaErrors(cudaMalloc((void **) &d_rngStates, grid.x * block.x * sizeof(curandState)));
 
-    unsigned int *d_res = 0;
-    handleCudaErrors(cudaMalloc((void **) &d_res, grid.x * sizeof(unsigned int)));
+    double *d_res = 0;
+    handleCudaErrors(cudaMalloc((void **) &d_res, grid.x * sizeof(double)));
 
     initRNG<<<grid, block>>>(d_rngStates, time(NULL));
 
     naive_kernel<<<grid, block,  block.x * sizeof(unsigned int)>>>(d_res, d_rngStates, iterationsperThread);
 
-    std::vector<unsigned int> res(grid.x);
-    handleCudaErrors(cudaMemcpy(&res[0], d_res, grid.x * sizeof(unsigned int),
+    std::vector<double> res(grid.x);
+    handleCudaErrors(cudaMemcpy(&res[0], d_res, grid.x * sizeof(double),
 				cudaMemcpyDeviceToHost));
 
-    double estimate = static_cast<double>(std::accumulate(res.begin(),
-							  res.end(), 0));
-    estimate /= grid.x * block.x * iterationsperThread;
-
+    double estimate = std::accumulate(res.begin(), res.end(), 0.0);
     cudaFree(d_rngStates);
     cudaFree(d_res);
 
