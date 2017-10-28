@@ -12,10 +12,10 @@ __global__ void initRNG(curandState * const rngStates, const unsigned int seed)
     curand_init(seed, tid, 0, &rngStates[tid]);
 }
 
-__device__ void draw(float &angle, float &distance, curandState &state)
+__device__ void draw(double &angle, double &distance, curandState &state)
 {
-    angle = cosf(curand_uniform(&state) * CUDART_PIO2_F);
-    distance = curand_uniform(&state) * 2;
+    angle = cos(curand_uniform_double(&state) * CUDART_PIO2);
+    distance = curand_uniform_double(&state) * 2.0;
 }
 
 __device__ unsigned int reduce_sum(unsigned int in)
@@ -60,8 +60,8 @@ __global__ void naive_kernel (double *const results,
 
     for (unsigned int i = 0; i < numSims ; i++)
     {
-        float angle;
-        float distance;
+        double angle;
+        double distance;
         draw(angle, distance, localState);
 
         if (distance <= angle)
