@@ -5,6 +5,9 @@ find_package(CUDA QUIET REQUIRED)
 
 include(CTest)
 
+set (DCMAKE_CUDA_HOST_COMPILER "/usr/bin/g++-5")
+set (CMAKE_EXPORT_COMPILE_COMMANDS "ON")
+
 add_library( misc STATIC
   misc.hu
   misc.cu)
