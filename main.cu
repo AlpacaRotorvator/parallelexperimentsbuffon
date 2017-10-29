@@ -1,3 +1,4 @@
+#include <iostream>
 #include <ctime>
 #include <functional>
 #include <vector>
@@ -83,7 +84,7 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
     curandSetPseudoRandomGeneratorSeed(generator, time(NULL));
 
     auto unifGen = std::bind(curandGenerateUniform, generator, _1, _2);
-    
+
     //For partial results
     float *d_res = 0;
     handleCudaErrors(cudaMalloc((void **) &d_res, grid.x * sizeof(float)));
@@ -94,34 +95,36 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
     //Random number vector allocation strategy
     unsigned int numThreads = grid.x * block.x;
     unsigned long int totalSize = sizeof(float) * its * numThreads;
-    unsigned long int vecSize = numThreads * 128 * 1024;
+    unsigned int vecSize = numThreads * 128 * 1024;
     unsigned long int remainSize = totalSize;
 
     float * d_angleVec = 0;
-    handleCudaErrors(cudaMalloc((void**) d_angleVec, vecSize));
+    handleCudaErrors(cudaMalloc((void**) &d_angleVec, vecSize));
 
     float * d_distVec = 0;
-    handleCudaErrors(cudaMalloc((void**) d_distVec, vecSize));
+    handleCudaErrors(cudaMalloc((void**) &d_distVec, vecSize));
 
 
     unsigned int vecCount = vecSize / sizeof(float);
+    unsigned int numRuns = 0;
+    std::vector<float> res(grid.x);
 
+    unsigned long int count;
     //Here we go!
     while (remainSize > sizeof(float)) {
+	numRuns++;
 	if (remainSize < vecSize) {
 	    vecCount = remainSize / sizeof(float);
 	}
-
+	count += vecCount;
 	unifGen(d_angleVec, vecCount);
 	unifGen(d_distVec, vecCount);
 
 	batchrng_kernel<<<grid, block,  block.x * sizeof(unsigned int)>>>
 	    ( d_res, d_angleVec, d_distVec, vecCount);
 
-	std::vector<float> res(grid.x);
 	handleCudaErrors(cudaMemcpy(&res[0], d_res, grid.x * sizeof(float),
 				    cudaMemcpyDeviceToHost));
-
 	runningEstimate += std::accumulate(res.begin(), res.end(), 0.0);
 	
 	if (remainSize > vecSize) {
@@ -131,10 +134,10 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
 	    break;
 	}
     }
-
+    std::cout << "\t" << count << " " << numThreads * its << std::endl;
     cudaFree(d_angleVec);
     cudaFree(d_distVec);
     cudaFree(d_res);
     
-    return runningEstimate;
+    return runningEstimate / numRuns;
 }

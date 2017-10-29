@@ -15,10 +15,10 @@ __global__ void batchrng_kernel (float *const results,
     // Count the number of draws that cross the line
     unsigned int pointsInside = 0;
 
-    for (unsigned int i = 0; i < numSims / step; i++)
+    for (unsigned int i = tid; i < numSims; i += step)
     {
-        float angle = cosf(angleVec[tid + i * step] * CUDART_PIO2_F);
-        float distance = 2 * distVec[tid + i * step];
+        float angle = cosf(angleVec[i] * CUDART_PIO2_F);
+        float distance = 2 * distVec[i];
 	
         if (distance <= angle)
         {
@@ -32,7 +32,7 @@ __global__ void batchrng_kernel (float *const results,
     // Store the result
     if (threadIdx.x == 0)
     {
-        results[bid] = (static_cast<float>(numSims) * blockDim.x) /
-	    (static_cast<float>(pointsInside) * gridDim.x);
+        results[bid] = (static_cast<float>(numSims)) /
+	    (static_cast<float>(pointsInside) * gridDim.x * gridDim.x);
     }
 }
