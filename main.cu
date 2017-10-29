@@ -33,6 +33,11 @@ int main (int argc, char ** argv)
     switch (kernel) {
     case 0:
 	piest = compute_naive(grid, block, device, iterationsPerThread);
+	break;
+    case 1:
+	piest = compute_batchrng(grid, block, device, iterationsPerThread,
+				 &deviceProp);
+	break;
     }
     
     reportResults(piest, iterationsPerThread, grid.x, block.x, &deviceProp);
@@ -70,6 +75,7 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
 			unsigned int its,
 			cudaDeviceProp *const deviceProp)
 {
+    handleCudaErrors(cudaSetDevice(device));
     //Set up the RNG
     using namespace std::placeholders;
     curandGenerator_t generator;

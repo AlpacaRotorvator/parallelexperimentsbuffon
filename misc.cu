@@ -61,7 +61,7 @@ void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
 		break;
 	    case 'k':
 		candidate = atoi(optarg);
-		if (candidate < 0 || candidate > 0) {
+		if (candidate < 0 || candidate > 1) {
 		    throw runtime_error("Kernel number must be 0, 1 or 2");
 		}
 		else {
