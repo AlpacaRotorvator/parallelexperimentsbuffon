@@ -1,0 +1,6 @@
+__device__ unsigned int reduce_sum(unsigned int in);
+
+__global__ void batchrng_kernel (float *const results,
+				 float *const angleVec,
+				 float *const distVec,
+				 const unsigned int numSims);

@@ -1,12 +1,19 @@
 #include <ctime>
+#include <functional>
 #include <vector>
 #include <numeric>
 #include <cuda_runtime.h>
+#include <curand_kernel.h>
 #include "naive_kernel.hu"
+#include "batchrng_kernel.hu"
 #include "misc.hu"
 
 double compute_naive(dim3 grid, dim3 block, unsigned int device,
 		     unsigned int iterationsperThread);
+
+double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
+			unsigned int iterationsperThread,
+			cudaDeviceProp *const deviceProp);
 
 int main (int argc, char ** argv)
 {
@@ -57,4 +64,71 @@ double compute_naive(dim3 grid, dim3 block, unsigned int device,
     cudaFree(d_res);
 
     return estimate;
+}
+
+double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
+			unsigned int its,
+			cudaDeviceProp *const deviceProp)
+{
+    //Set up the RNG
+    using namespace std::placeholders;
+    curandGenerator_t generator;
+    curandCreateGenerator(&generator, CURAND_RNG_PSEUDO_DEFAULT);
+    curandSetPseudoRandomGeneratorSeed(generator, time(NULL));
+
+    auto unifGen = std::bind(curandGenerateUniform, generator, _1, _2);
+    
+    //For partial results
+    float *d_res = 0;
+    handleCudaErrors(cudaMalloc((void **) &d_res, grid.x * sizeof(float)));
+
+    //To calculate the final result
+    double runningEstimate = 0;
+    
+    //Random number vector allocation strategy
+    unsigned int numThreads = grid.x * block.x;
+    unsigned long int totalSize = sizeof(float) * its * numThreads;
+    unsigned long int vecSize = numThreads * 512 * 1024;
+    unsigned long int remainSize = totalSize;
+
+    float * d_angleVec;
+    handleCudaErrors(cudaMalloc((void**) d_angleVec, vecSize));
+
+    float * d_distVec;
+    handleCudaErrors(cudaMalloc((void**) d_distVec, vecSize));
+
+
+    unsigned int vecCount = vecSize / sizeof(float);
+
+    //Here we go!
+    while (remainSize > sizeof(float)) {
+	if (remainSize < vecSize) {
+	    vecCount = remainSize / sizeof(float);
+	}
+
+	unifGen(d_angleVec, vecCount);
+	unifGen(d_distVec, vecCount);
+
+	batchrng_kernel<<<grid, block,  block.x * sizeof(unsigned int)>>>
+	    ( d_res, d_angleVec, d_distVec, vecCount);
+
+	std::vector<float> res(grid.x);
+	handleCudaErrors(cudaMemcpy(&res[0], d_res, grid.x * sizeof(float),
+				    cudaMemcpyDeviceToHost));
+
+	runningEstimate += std::accumulate(res.begin(), res.end(), 0.0);
+	
+	if (remainSize > vecSize) {
+	    remainSize -= vecSize;
+	}
+	else {
+	    break;
+	}
+    }
+
+    cudaFree(d_angleVec);
+    cudaFree(d_distVec);
+    cudaFree(d_res);
+    
+    return runningEstimate;
 }

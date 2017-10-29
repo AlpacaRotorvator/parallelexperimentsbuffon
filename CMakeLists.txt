@@ -22,6 +22,14 @@ target_compile_features(naive_kernel PUBLIC cxx_std_11)
 set_target_properties( naive_kernel
                        PROPERTIES CUDA_SEPARABLE_COMPILATION ON
                        )		     
+
+add_library( batchrng_kernel STATIC
+  batchrng_kernel.hu
+  batchrng_kernel.cu)
+target_compile_features(batchrng_kernel PUBLIC cxx_std_11)
+set_target_properties( batchrng_kernel
+                       PROPERTIES CUDA_SEPARABLE_COMPILATION ON
+                       )	
 		     
 
 add_executable(
@@ -29,5 +37,8 @@ add_executable(
   main.cu)
 
 set_target_properties(buffoncuda PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+target_compile_features(buffoncuda PUBLIC cxx_std_11)
 target_link_libraries(buffoncuda PRIVATE naive_kernel)
+target_link_libraries(buffoncuda PRIVATE ${CUDA_curand_LIBRARY})
+target_link_libraries(buffoncuda PRIVATE batchrng_kernel)
 target_link_libraries(buffoncuda PRIVATE misc)
