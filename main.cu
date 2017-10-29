@@ -88,13 +88,13 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
     //Random number vector allocation strategy
     unsigned int numThreads = grid.x * block.x;
     unsigned long int totalSize = sizeof(float) * its * numThreads;
-    unsigned long int vecSize = numThreads * 512 * 1024;
+    unsigned long int vecSize = numThreads * 128 * 1024;
     unsigned long int remainSize = totalSize;
 
-    float * d_angleVec;
+    float * d_angleVec = 0;
     handleCudaErrors(cudaMalloc((void**) d_angleVec, vecSize));
 
-    float * d_distVec;
+    float * d_distVec = 0;
     handleCudaErrors(cudaMalloc((void**) d_distVec, vecSize));
 
 

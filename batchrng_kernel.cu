@@ -1,5 +1,6 @@
 #include <cuda_runtime.h>
 #include <math_constants.h>
+#include "batchrng_kernel.hu"
 
 __global__ void batchrng_kernel (float *const results,
 				 float *const angleVec,
@@ -17,7 +18,7 @@ __global__ void batchrng_kernel (float *const results,
     for (unsigned int i = 0; i < numSims / step; i++)
     {
         float angle = cosf(angleVec[tid + i * step] * CUDART_PIO2_F);
-        float distance = 2 * distleVec[tid + i * step];
+        float distance = 2 * distVec[tid + i * step];
 	
         if (distance <= angle)
         {
@@ -34,29 +35,4 @@ __global__ void batchrng_kernel (float *const results,
         results[bid] = (static_cast<float>(numSims) * blockDim.x) /
 	    (static_cast<float>(pointsInside) * gridDim.x);
     }
-}
-
-__device__ unsigned int reduce_sum(unsigned int in)
-{
-    extern __shared__ unsigned int sdata[];
-
-    // Perform first level of reduction:
-    // - Write to shared memory
-    unsigned int ltid = threadIdx.x;
-
-    sdata[ltid] = in;
-    __syncthreads();
-
-    // Do reduction in shared mem
-    for (unsigned int s = blockDim.x / 2 ; s > 0 ; s >>= 1)
-    {
-        if (ltid < s)
-        {
-            sdata[ltid] += sdata[ltid + s];
-        }
-
-        __syncthreads();
-    }
-
-    return sdata[0];
 }

@@ -1,3 +1,6 @@
+#ifndef NAIVE_KERNEL_H
+#define NAIVE_KERNEL_H
+
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 
@@ -10,3 +13,6 @@ __device__ unsigned int reduce_sum(unsigned int in);
 __global__ void naive_kernel (float *const results,
 			      curandState *const rngStates,
 			      const unsigned int numSims);
+
+
+#endif
