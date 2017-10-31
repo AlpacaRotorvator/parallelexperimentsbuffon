@@ -1,5 +1,7 @@
 #include <cuda_runtime.h>
 #include <math_constants.h>
+//For the reduce sum function
+#include "cutils.hu"
 #include "batchrng_kernel.hu"
 
 __global__ void batchrng_kernel (float *const results,

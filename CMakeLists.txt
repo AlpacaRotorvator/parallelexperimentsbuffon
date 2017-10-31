@@ -11,6 +11,13 @@ include_directories(/opt/cuda/include /opt/cuda/samples/common/inc)
 
 #list (APPEND CMAKE_CUDA_FLAGS "-lineinfo -Wno-deprecated-gpu-targets")
 
+add_library( cutils STATIC
+  cutils.hu
+  cutils.cu)
+set_target_properties( cutils
+                       PROPERTIES CUDA_SEPARABLE_COMPILATION ON
+                       )
+		     
 add_library( misc STATIC
   misc.hu
   misc.cu)
@@ -45,3 +52,4 @@ target_link_libraries(buffoncuda PRIVATE naive_kernel)
 target_link_libraries(buffoncuda PRIVATE ${CUDA_curand_LIBRARY})
 target_link_libraries(buffoncuda PRIVATE batchrng_kernel)
 target_link_libraries(buffoncuda PRIVATE misc)
+target_link_libraries(buffoncuda PRIVATE cutils)
