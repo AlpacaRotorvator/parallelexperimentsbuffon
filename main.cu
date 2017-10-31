@@ -1,7 +1,6 @@
 #include <iostream>
 #include <ctime>
 #include <algorithm>
-#include <functional>
 #include <vector>
 #include <numeric>
 #include <cuda_runtime.h>
@@ -26,6 +25,7 @@ int main (int argc, char ** argv)
     cudaDeviceProp deviceProp;
     unsigned int device = 0;
     handleCudaErrors(cudaGetDeviceProperties(&deviceProp, device));
+    handleCudaErrors(cudaSetDevice(device));
 
     unsigned int iterationsPerThread = 1000 * 1000;
     dim3 grid = 16;
@@ -87,7 +87,6 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
 			unsigned int its,
 			cudaDeviceProp *const deviceProp)
 {
-    handleCudaErrors(cudaSetDevice(device));
     //Set up the RNG
     curandGenerator_t generator;
     curandCreateGenerator(&generator, CURAND_RNG_PSEUDO_DEFAULT);
