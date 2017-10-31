@@ -1,12 +1,15 @@
 cmake_minimum_required(VERSION 2.8)
+
 project(buffoncuda LANGUAGES CXX CUDA)
 
 find_package(CUDA QUIET REQUIRED)
-
 include(CTest)
 
-set (DCMAKE_CUDA_HOST_COMPILER "/usr/bin/g++-5")
 #set (CMAKE_EXPORT_COMPILE_COMMANDS "ON")
+
+include_directories(/opt/cuda/include /opt/cuda/samples/common/inc)
+
+#list (APPEND CMAKE_CUDA_FLAGS "-lineinfo -Wno-deprecated-gpu-targets")
 
 add_library( misc STATIC
   misc.hu
