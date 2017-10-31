@@ -89,12 +89,9 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
 {
     handleCudaErrors(cudaSetDevice(device));
     //Set up the RNG
-    using namespace std::placeholders;
     curandGenerator_t generator;
     curandCreateGenerator(&generator, CURAND_RNG_PSEUDO_DEFAULT);
     curandSetPseudoRandomGeneratorSeed(generator, time(NULL));
-
-    auto unifGen = std::bind(curandGenerateUniform, generator, _1, _2);
 
     //For partial results
     float *d_res = 0;
@@ -128,8 +125,8 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
 	    vecCount = remainSize / sizeof(float);
 	}
 	count += vecCount;
-	unifGen(d_angleVec, vecCount);
-	unifGen(d_distVec, vecCount);
+	curandGenerateUniform(generator, d_angleVec, vecCount);
+	curandGenerateUniform(generator, d_distVec, vecCount);
 
 	batchrng_kernel<<<grid, block,  block.x * sizeof(unsigned int)>>>
 	    ( d_res, d_angleVec, d_distVec, vecCount);
