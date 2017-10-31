@@ -10,4 +10,4 @@ void parseArgs (int argc, char ** argv, unsigned int * iterationsPerThread,
 		unsigned int * threadsPerBlock, unsigned int * kernel);
 
 void reportResults (double estimate, unsigned int itpT,  unsigned int gridS,
-		    unsigned int blockS, cudaDeviceProp *const deviceProp);
+		    unsigned int blockS, cudaDeviceProp *const deviceProp, float elapsedTime);

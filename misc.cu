@@ -76,21 +76,22 @@ void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
 }
 
 void reportResults (double estimate, unsigned int itpT,  unsigned int gridS,
-		    unsigned int blockS, cudaDeviceProp *const deviceProp)
+		    unsigned int blockS, cudaDeviceProp *const deviceProp, float elapsedTime)
 {
     double abserr = abs(estimate - CUDART_PI);
     double relerr = abserr / CUDART_PI;
 
-    cout << "      RESULTADOS:       " << endl;
+    cout << "      RESULTS:          " << endl;
     cout << "========================" << endl;
-    cout << "Nome do dispositivo:    " << deviceProp->name << endl;
-    cout << "Tamanho da grid:        " << gridS << endl;
-    cout << "Tamanho dos blocos:     " << blockS << endl;
-    cout << "Número de threads:      " << blockS * gridS << endl;
-    cout << "Estimativas por thread: " << itpT << endl;
-    cout << "Total de estimativas:   " << static_cast<double>(itpT) * blockS * gridS << endl;
-    cout << "Estimativa de PI:       " << estimate << endl;
-    cout << "Erro absoluto:          " << abserr << endl;
-    cout << "Erro relativo:          " << relerr << endl;
+    cout << "Device Name:            " << deviceProp->name << endl;
+    cout << "Grid Size:              " << gridS << endl;
+    cout << "Block Size:             " << blockS << endl;
+    cout << "Number of threads:      " << blockS * gridS << endl;
+    cout << "Iterations per thread:  " << itpT << endl;
+    cout << "Total iterations:       " << static_cast<double>(itpT) * blockS * gridS << endl;
+    cout << "Kernel execution time:  " << elapsedTime << "s" << endl;
+    cout << "PI estimate:            " << estimate << endl;
+    cout << "Abolute error:          " << abserr << endl;
+    cout << "Relative error:         " << relerr << endl;
     
 }

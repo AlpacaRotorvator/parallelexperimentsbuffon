@@ -6,6 +6,7 @@
 #include <numeric>
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
+#include <helper_timer.h>
 #include "naive_kernel.hu"
 #include "batchrng_kernel.hu"
 #include "misc.hu"
@@ -33,6 +34,9 @@ int main (int argc, char ** argv)
     parseArgs(argc, argv, &iterationsPerThread, &deviceProp,
 	      &grid.x, &block.x, &kernel);
 
+    StopWatchInterface *timer = NULL;
+    sdkCreateTimer(&timer);
+    sdkStartTimer(&timer);
     switch (kernel) {
     case 0:
 	piest = compute_naive(grid, block, device, iterationsPerThread);
@@ -45,8 +49,10 @@ int main (int argc, char ** argv)
 	piest = compute_batchrng(grid, block, device,
 					 iterationsPerThread, &deviceProp);
     }
-
-    reportResults(piest, iterationsPerThread, grid.x, block.x, &deviceProp);
+    sdkStopTimer(&timer);
+    float elapsedTime = sdkGetAverageTimerValue(&timer)/1000.0f;
+    
+    reportResults(piest, iterationsPerThread, grid.x, block.x, &deviceProp, elapsedTime);
 
     return 0;
 }
