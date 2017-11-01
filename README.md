@@ -12,7 +12,8 @@ Without cmake:
 Get cmake, seriously.
 
 # Running
-   ./buffoncuda [STUFF]
+    ./buffoncuda [STUFF]
+
 Runs a million throws per thread on a 16 block long grid with 64 threads per block(completely arbitrary choice) using 
 the naive kernel(see below for details on kernels)
    
