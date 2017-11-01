@@ -1,23 +1,26 @@
 # parallelexperimentsbuffon
+
 Buffon's Needle. In Cuda.
 
 # Building
 With cmake:
 
-    cmake . && make
-(Real men build in-source, deal with it)
+    mkdir build && cd build
+    cmake .. && make
 
 Without cmake:
 
-Get cmake, seriously.
+    make
 
 # Running
+
     ./buffoncuda [STUFF]
 
-Runs a million throws per thread on a 16 block long grid with 64 threads per block(completely arbitrary choice) using 
-the naive kernel(see below for details on kernels)
+Without additional arguments, runs a million throws per thread on a 16 block long grid with 64 threads per block(completely arbitrary choice) 
+using the naive kernel(see below for details on kernels)
    
 ## Command line parameters
+
 * `-n x`: run x throws of the needle per thread.
 * `-b x`: use a grid with x blocks.
 * `-t x`: use x threads per block.
