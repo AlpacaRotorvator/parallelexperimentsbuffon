@@ -6,7 +6,7 @@ OBJS = $(patsubst %.cu, %.o, $(SRCS))
 CXXFLAGS += -O3
 NVCC := nvcc -ccbin $(CXX)
 
-NVCCFLAGS := -m64 -std=c++11
+NVCCFLAGS := -m64 -std=c++11 -lineinfo
 
 ALL_CXXFLAGS := $(NVCCFLAGS)
 ALL_CXXFLAGS += $(addprefix -Xcompiler ,$(CXXFLAGS))
