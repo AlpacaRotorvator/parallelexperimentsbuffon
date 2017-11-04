@@ -101,8 +101,24 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
     
     //Random number vector allocation strategy
     unsigned int numThreads = grid.x * block.x;
+    //Total size of *1* vector, I need *2*
     unsigned long int totalSize = sizeof(float) * its * numThreads;
-    unsigned int vecSize = 128 * 1024 * 1024;
+
+    //Get device's free and total global memory
+    size_t freeMem = 0;
+    size_t totalMem = 0;
+    handleCudaErrors(cudaMemGetInfo(&freeMem, &totalMem));
+    unsigned int vecSize = 0;
+    
+    //Allocate everything at once if we can get away with it
+    if (2 * totalSize <= freeMem * 0.9) {
+	vecSize = totalSize;
+    }
+    else {
+	//Spare 10% of the device's free memory(not because this program will need it, but because I have only one GPU and I don't feel like locking my system)
+	vecSize = static_cast<unsigned int>(freeMem * 0.9 / 2);
+    }
+    
     unsigned long int remainSize = totalSize;
 
     float * d_angleVec = 0;

@@ -28,5 +28,4 @@ using the naive kernel(see below for details on kernels)
 
 ## Available kernels
 0. naive: almost what you get if you pick a serial implementation and throw \_\_global\_\_ around generously.
-1. batchRNG: allocates blocks(currently hardcoded 2x128MB) of global memory, fill them up with random numbers and 
-let the threads loose on them. Actually slower than naive because I have no idea how to deal with global memory efficiently.
+1. batchRNG: allocates large blocks of global memory, fills them up with random numbers and lets the threads loose on them. Actually slower than naive because I have no idea how to deal with global memory efficiently.
