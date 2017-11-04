@@ -106,7 +106,7 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
     size_t freeMem = 0;
     size_t totalMem = 0;
     handleCudaErrors(cudaMemGetInfo(&freeMem, &totalMem));
-    unsigned int vecSize = 0;
+    size_t vecSize = 0;
     
     //Allocate everything at once if we can get away with it
     if (2 * totalSize <= freeMem * 0.9) {
@@ -116,8 +116,8 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
 	//Spare 10% of the device's free memory(not because this program will need it, but because I have only one GPU and I don't feel like locking my system)
 	vecSize = static_cast<unsigned int>(freeMem * 0.9 / 2 );
     }
-    unsigned int vecCount = vecSize / sizeof(float);
-    unsigned long int remainSize = totalSize;
+    size_t vecCount = vecSize / sizeof(float);
+    size_t remainSize = totalSize;
 
     CudaResourceWrapper<float> d_angleVec(vecCount);
     CudaResourceWrapper<float> d_distVec(vecCount);
@@ -125,14 +125,13 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
     unsigned int numRuns = 0;
     std::vector<float> res(grid.x);
 
-    unsigned int count = 0;
     //Here we go!
     while (remainSize > sizeof(float)) {
 	numRuns++;
 	if (remainSize < vecSize) {
 	    vecCount = remainSize / sizeof(float);
 	}
-	count += vecCount;
+	
 	curandGenerateUniform(generator, d_angleVec.getPtr(), vecCount);
 	curandGenerateUniform(generator, d_distVec.getPtr(), vecCount);
 
