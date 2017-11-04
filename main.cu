@@ -9,6 +9,7 @@
 #include "naive_kernel.hu"
 #include "batchrng_kernel.hu"
 #include "misc.hu"
+#include "cudaResourceWrapper.hu"
 
 double compute_naive(dim3 grid, dim3 block, unsigned int device,
 		     unsigned int iterationsperThread);
@@ -62,23 +63,20 @@ double compute_naive(dim3 grid, dim3 block, unsigned int device,
 {
     handleCudaErrors(cudaSetDevice(device));
 
-    curandState *d_rngStates = 0;
-    handleCudaErrors(cudaMalloc((void **) &d_rngStates, grid.x * block.x * sizeof(curandState)));
+    CudaResourceWrapper<curandState> d_rngStates(grid.x * block.x);
 
-    float *d_res = 0;
-    handleCudaErrors(cudaMalloc((void **) &d_res, grid.x * sizeof(float)));
+    CudaResourceWrapper<float> d_res(grid.x);
 
-    initRNG<<<grid, block>>>(d_rngStates, time(NULL));
+    initRNG<<<grid, block>>>(d_rngStates.getPtr(), time(NULL));
 
-    naive_kernel<<<grid, block,  block.x * sizeof(unsigned int)>>>(d_res, d_rngStates, iterationsperThread);
+    naive_kernel<<<grid, block,  block.x * sizeof(unsigned int)>>>
+	(d_res.getPtr(), d_rngStates.getPtr(), iterationsperThread);
 
     std::vector<float> res(grid.x);
-    handleCudaErrors(cudaMemcpy(&res[0], d_res, grid.x * sizeof(float),
+    handleCudaErrors(cudaMemcpy(&res[0], d_res.getPtr(), grid.x * sizeof(float),
 				cudaMemcpyDeviceToHost));
 
     double estimate = std::accumulate(res.begin(), res.end(), 0.0);
-    cudaFree(d_rngStates);
-    cudaFree(d_res);
 
     return estimate;
 }
