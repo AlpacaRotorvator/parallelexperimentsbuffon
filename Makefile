@@ -17,7 +17,7 @@ ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 CUDART_DIR := /opt/cuda
 
 # Gencode arguments
-SMS ?= 20 30
+SMS ?= 30
 
 ifeq ($(GENCODE_FLAGS),)
 # Generate SASS code for each SM architecture listed in $(SMS)
