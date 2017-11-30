@@ -2,26 +2,86 @@
 #include <stdexcept>
 #include <cuda_runtime.h>
 
+//It sucks, it's ugly and it's unsafe, but it does the job. Eh.
+
 template <typename ptrType>
-class CudaResourceWrapper {
+class CudaResWrapper {
 public:
-    CudaResourceWrapper(size_t numEls);
-    ~CudaResourceWrapper() {cudaFree(internalPointer); }
+    CudaResWrapper(size_t numEls);
+    ~CudaResWrapper() {cudaFree(internalPointer); }
 
     ptrType * getPtr() {return internalPointer;}
     size_t getResSize() {return resourceSize;}
 private:
     ptrType * internalPointer;
     size_t resourceSize;
-    void operator=(CudaResourceWrapper b) {}
+    void operator=(CudaResWrapper b) {}
 };
 
 template <typename ptrType>
-CudaResourceWrapper<ptrType>::CudaResourceWrapper (size_t numEls):
+CudaResWrapper<ptrType>::CudaResWrapper (size_t numEls):
     resourceSize(numEls)
 {
     cudaError_t cudaResult = cudaSuccess;
     cudaResult = cudaMalloc((void **) &internalPointer, numEls * sizeof(ptrType));
+
+    if (cudaResult != cudaSuccess) {
+	std::string msg = "Couldn't allocate device memory for resource: ";
+	msg += cudaGetErrorString(cudaResult);
+	throw std::runtime_error(msg);
+    }  
+}
+
+//Managed memory version
+template <typename ptrType>
+class CudaResWrapperM {
+public:
+    CudaResWrapperM(size_t numEls);
+    ~CudaResWrapperM() {cudaFree(internalPointer); }
+
+    ptrType * getPtr() {return internalPointer;}
+    size_t getResSize() {return resourceSize;}
+private:
+    ptrType * internalPointer;
+    size_t resourceSize;
+    void operator=(CudaResWrapperM b) {}
+};
+
+template <typename ptrType>
+CudaResWrapperM<ptrType>::CudaResWrapperM (size_t numEls):
+    resourceSize(numEls)
+{
+    cudaError_t cudaResult = cudaSuccess;
+    cudaResult = cudaMallocManaged((void **) &internalPointer, numEls * sizeof(ptrType));
+
+    if (cudaResult != cudaSuccess) {
+	std::string msg = "Couldn't allocate device memory for resource: ";
+	msg += cudaGetErrorString(cudaResult);
+	throw std::runtime_error(msg);
+    }  
+}
+
+//For page-locked memory
+template <typename ptrType>
+class CudaResWrapperPL {
+public:
+    CudaResWrapperPL(size_t numEls);
+    ~CudaResWrapperPL() {cudaFreeHost(internalPointer); }
+
+    ptrType * getPtr() {return internalPointer;}
+    size_t getResSize() {return resourceSize;}
+private:
+    ptrType * internalPointer;
+    size_t resourceSize;
+    void operator=(CudaResWrapperPL b) {}
+};
+
+template <typename ptrType>
+CudaResWrapperPL<ptrType>::CudaResWrapperPL (size_t numEls):
+    resourceSize(numEls)
+{
+    cudaError_t cudaResult = cudaSuccess;
+    cudaResult = cudaMallocHost((void **) &internalPointer, numEls * sizeof(ptrType));
 
     if (cudaResult != cudaSuccess) {
 	std::string msg = "Couldn't allocate device memory for resource: ";

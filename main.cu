@@ -63,9 +63,9 @@ double compute_naive(dim3 grid, dim3 block, unsigned int device,
 {
     handleCudaErrors(cudaSetDevice(device));
 
-    CudaResourceWrapper<curandState> d_rngStates(grid.x * block.x);
+    CudaResWrapper<curandState> d_rngStates(grid.x * block.x);
 
-    CudaResourceWrapper<float> d_res(grid.x);
+    CudaResWrapper<float> d_res(grid.x);
 
     initRNG<<<grid, block>>>(d_rngStates.getPtr(), time(NULL));
 
@@ -91,7 +91,7 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
     curandSetPseudoRandomGeneratorSeed(generator, time(NULL));
 
     //For partial results
-    CudaResourceWrapper<float> d_res(grid.x);
+    CudaResWrapper<float> d_res(grid.x);
 
 
     //To calculate the final result
@@ -119,8 +119,8 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
     size_t vecCount = vecSize / sizeof(float);
     size_t remainSize = totalSize;
 
-    CudaResourceWrapper<float> d_angleVec(vecCount);
-    CudaResourceWrapper<float> d_distVec(vecCount);
+    CudaResWrapper<float> d_angleVec(vecCount);
+    CudaResWrapper<float> d_distVec(vecCount);
 
     unsigned int numRuns = 0;
     std::vector<float> res(grid.x);
