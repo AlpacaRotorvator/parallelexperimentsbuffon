@@ -5,6 +5,12 @@ __global__ void initRNG(curandState * const rngStates, const unsigned int seed);
 
 __device__ void draw(float &angle, float &distance, curandState &state);
 
+__device__ void drawOptim(float &angle, float &distance, curandState &state);
+
+__global__ void naivest_kernel (float *const results,
+			      curandState *const rngStates,
+			      const unsigned int numSims);
+
 __global__ void naive_kernel (float *const results,
 			      curandState *const rngStates,
 			      const unsigned int numSims);

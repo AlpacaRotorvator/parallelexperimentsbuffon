@@ -11,6 +11,9 @@
 #include "misc.hu"
 #include "cudaResourceWrapper.hu"
 
+double compute_naivest(dim3 grid, dim3 block, unsigned int device,
+		       unsigned int iterationsperThread);
+
 double compute_naive(dim3 grid, dim3 block, unsigned int device,
 		     unsigned int iterationsperThread);
 
@@ -40,15 +43,15 @@ int main (int argc, char ** argv)
     sdkStartTimer(&timer);
     switch (kernel) {
     case 0:
-	piest = compute_naive(grid, block, device, iterationsPerThread);
+	piest = compute_naivest(grid, block, device, iterationsPerThread);
 	break;
     case 1:
+	piest = compute_naive(grid, block, device, iterationsPerThread);
+	break;
+    case 2:
 	piest = compute_batchrng(grid, block, device, iterationsPerThread,
 				 &deviceProp);
 	break;
-    case 2:
-	piest = compute_batchrng(grid, block, device,
-					 iterationsPerThread, &deviceProp);
     }
     sdkStopTimer(&timer);
     float elapsedTime = sdkGetAverageTimerValue(&timer)/1000.0f;
@@ -56,6 +59,29 @@ int main (int argc, char ** argv)
     reportResults(piest, iterationsPerThread, grid.x, block.x, &deviceProp, elapsedTime);
 
     return 0;
+}
+
+double compute_naivest(dim3 grid, dim3 block, unsigned int device,
+		     unsigned int iterationsperThread)
+{
+    handleCudaErrors(cudaSetDevice(device));
+
+    CudaResWrapper<curandState> d_rngStates(grid.x * block.x);
+
+    CudaResWrapper<float> d_res(grid.x);
+
+    initRNG<<<grid, block>>>(d_rngStates.getPtr(), time(NULL));
+
+    naivest_kernel<<<grid, block,  block.x * sizeof(unsigned int)>>>
+	(d_res.getPtr(), d_rngStates.getPtr(), iterationsperThread);
+
+    std::vector<float> res(grid.x);
+    handleCudaErrors(cudaMemcpy(&res[0], d_res.getPtr(), grid.x * sizeof(float),
+				cudaMemcpyDeviceToHost));
+
+    double estimate = std::accumulate(res.begin(), res.end(), 0.0);
+
+    return estimate;
 }
 
 double compute_naive(dim3 grid, dim3 block, unsigned int device,
@@ -113,7 +139,7 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
 	vecSize = totalSize;
     }
     else {
-	//Spare 10% of the device's free memory(not because this program will need it, but because I have only one GPU and I don't feel like locking my system)
+	//Spare 10% of the device's free memory(not because this program will likely need it, but because I have only one GPU and I don't feel like locking my system)
 	vecSize = static_cast<unsigned int>(freeMem * 0.9 / 2 );
     }
     size_t vecCount = vecSize / sizeof(float);

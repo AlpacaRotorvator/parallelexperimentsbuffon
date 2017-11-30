@@ -19,8 +19,8 @@ __global__ void batchrng_kernel (float *const results,
 
     for (unsigned int i = tid; i < numSims; i += step)
     {
-        float angle = cosf(angleVec[i] * CUDART_PIO2_F);
-        float distance = 2 * distVec[i];
+        float angle = cospif(angleVec[i] / 2.0f );
+        float distance = 2.0f * distVec[i];
 	
         if (distance <= angle)
         {
