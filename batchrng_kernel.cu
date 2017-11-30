@@ -4,6 +4,10 @@
 #include "cutils.hu"
 #include "batchrng_kernel.hu"
 
+__global__ void zeroRes (float *const results) {
+    results[threadIdx.x] = 0;
+}
+
 __global__ void batchrng_kernel (float *const results,
 				 float *const angleVec,
 				 float *const distVec,
@@ -12,20 +16,22 @@ __global__ void batchrng_kernel (float *const results,
     // Determine thread ID
     unsigned int bid = blockIdx.x;
     unsigned int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    unsigned int step = gridDim.x * blockDim.x;
+    unsigned int gridSz = gridDim.x * blockDim.x;
 
     // Count the number of draws that cross the line
     unsigned int pointsInside = 0;
-
-    for (unsigned int i = tid; i < numSims; i += step)
+    
+    for (unsigned int i = 0; i < numSims - gridSz; i += gridSz)
     {
-        float angle = cospif(angleVec[i] / 2.0f );
-        float distance = 2.0f * distVec[i];
+	if (tid + i < numSims) {
+	    float angle = cospif(angleVec[tid + i] / 2.0f );
+	    float distance = 2.0f * distVec[tid + i];
 	
-        if (distance <= angle)
-        {
-            pointsInside++;
-        }
+	    if (distance <= angle)
+		{
+		    pointsInside++;
+		}
+	}
     }
 
     // Reduce within the block
