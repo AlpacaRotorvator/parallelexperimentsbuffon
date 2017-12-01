@@ -161,7 +161,7 @@ double compute_batchrng(dim3 grid, dim3 block, unsigned int device,
 	curandGenerateUniform(generator, d_angleVec.getPtr(), vecCount);
 	curandGenerateUniform(generator, d_distVec.getPtr(), vecCount);
 
-	batchrng_kernel<<<grid, block,  block.x * sizeof(unsigned int)>>>
+	batchrng_kernel<<<grid, block,  block.x * sizeof(float)>>>
 	    (d_res.getPtr(), d_angleVec.getPtr(), d_distVec.getPtr(), vecCount);
 
 	handleCudaErrors(cudaMemcpy(&res[0], d_res.getPtr(),
