@@ -20,7 +20,11 @@ void handleCudaErrors (cudaError_t cudaResult, string msg)
 void printHelpmsg ()
 {
     string helpMsg = "Usage: buffoncuda [-n <NUMINT>] [-b <BLOCKNUM>] [-t <TNUM>] [-k <KERNID>] [-d <DEVID>]\n\n";
-    helpMsg += "Please remember me to finish writing this if you feel frustrated by the lack of proper documentation.\n";
+    helpMsg += "  -n <NUMINT>      Iterations per thread\n";
+    helpMsg += "  -d <DEVID>       Index of the device to be used\n";
+    helpMsg += "  -b <BLOCKNUM>    Number of blocks in the grid\n";
+    helpMsg += "  -t <TNUM>        Threads per block\n";
+    helpMsg += "  -k <KERNID>      Kernel to execute. 0 for naivest, 1 for naive, 2 for batchRNG\n";
     cout << helpMsg;
     exit(0);
 }
