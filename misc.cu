@@ -32,7 +32,7 @@ void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
     char cmdFlag;
     int candidate = 0;
     bool dFlag = 0;
-    cudaError_t result = cudaSetDevice(candidate);
+    cudaError_t result = cudaSuccess;
     
     while((cmdFlag = getopt(argc, argv, "n:b:t:k:d:h")) != -1) {
 	switch (cmdFlag)
