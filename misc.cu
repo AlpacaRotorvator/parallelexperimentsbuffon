@@ -43,7 +43,7 @@ void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
 	    case 'b':
 		candidate = atoi(optarg);
 		if (candidate <= 0) {
-		    throw runtime_error("Number of blocks must be greater than or equal to zero");
+		    throw runtime_error("Number of blocks must be greater than zero");
 		}
 		else {
 		    *numBlocks = candidate;
@@ -52,7 +52,7 @@ void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
 	    case 't':
 		candidate = atoi(optarg);
 		if (candidate <= 0) {
-		    throw runtime_error("Number of threads per block must be greater than or equal to zero.");
+		    throw runtime_error("Number of threads per block must be greater than zero.");
 		}
 		else if ((candidate & (candidate - 1)) != 0) {
 		    throw runtime_error("Number of threads per block must be a power of two(for efficient reduction).");
