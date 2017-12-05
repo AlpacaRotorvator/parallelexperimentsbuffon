@@ -27,16 +27,14 @@ int main (int argc, char ** argv)
     unsigned int kernel = 0;
     double piest;
     cudaDeviceProp deviceProp;
-    unsigned int device = 0;
-    handleCudaErrors(cudaGetDeviceProperties(&deviceProp, device));
-    handleCudaErrors(cudaSetDevice(device));
+    int device = 0;
 
     unsigned int iterationsPerThread = 1000 * 1000;
     dim3 grid = 16;
     dim3 block = 64;
 
     parseArgs(argc, argv, &iterationsPerThread, &deviceProp,
-	      &grid.x, &block.x, &kernel);
+	      &grid.x, &block.x, &kernel, &device);
 
     StopWatchInterface *timer = NULL;
     sdkCreateTimer(&timer);

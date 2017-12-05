@@ -19,7 +19,7 @@ void handleCudaErrors (cudaError_t cudaResult, string msg)
 
 void printHelpmsg ()
 {
-    string helpMsg = "Usage: buffoncuda [-n <NUMINT>] [-b <BLOCKNUM>] [-t <TNUM>] [-k <KERNID>]\n\n";
+    string helpMsg = "Usage: buffoncuda [-n <NUMINT>] [-b <BLOCKNUM>] [-t <TNUM>] [-k <KERNID>] [-d <DEVID>]\n\n";
     helpMsg += "Please remember me to finish writing this if you feel frustrated by the lack of proper documentation.\n";
     cout << helpMsg;
     exit(0);
@@ -27,12 +27,14 @@ void printHelpmsg ()
 
 void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
 		cudaDeviceProp * const deviceProp, unsigned int * numBlocks,
-		unsigned int *  threadsPerBlock, unsigned int * kernel)
+		unsigned int *  threadsPerBlock, unsigned int * kernel, int * device)
 {
     char cmdFlag;
     int candidate = 0;
-
-    while((cmdFlag = getopt(argc, argv, "n:b:t:k:h")) != -1) {
+    bool dFlag = 0;
+    cudaError_t result = cudaSetDevice(candidate);
+    
+    while((cmdFlag = getopt(argc, argv, "n:b:t:k:d:h")) != -1) {
 	switch (cmdFlag)
 	    {
 	    case 'n':
@@ -41,7 +43,7 @@ void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
 	    case 'b':
 		candidate = atoi(optarg);
 		if (candidate <= 0) {
-		    throw runtime_error("Number of blocks must be greater or equal than zero");
+		    throw runtime_error("Number of blocks must be greater than or equal to zero");
 		}
 		else {
 		    *numBlocks = candidate;
@@ -50,7 +52,7 @@ void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
 	    case 't':
 		candidate = atoi(optarg);
 		if (candidate <= 0) {
-		    throw runtime_error("Number of threads per block must be greater or equal than zero.");
+		    throw runtime_error("Number of threads per block must be greater than or equal to zero.");
 		}
 		else if ((candidate & (candidate - 1)) != 0) {
 		    throw runtime_error("Number of threads per block must be a power of two(for efficient reduction).");
@@ -68,10 +70,34 @@ void parseArgs (int argc, char ** argv, unsigned int *  iterationsPerThread,
 		    *kernel = candidate;
 		}
 		break;
+	    case 'd':
+		candidate = atoi(optarg);
+		result = cudaSetDevice(candidate);
+		if (result != cudaSuccess) {
+		    string msg("Couldn't set requested device: ");
+		    msg += cudaGetErrorString(result);
+		    throw runtime_error(msg);
+		}
+		*device = candidate;
+		dFlag = 1;
+		break;
 	    case 'h':
 		printHelpmsg();
 		break;
 	    }
+    }
+
+    if(!dFlag){
+	cudaSetDevice(*device);
+    }
+    
+    cudaGetDeviceProperties(deviceProp, *device);
+    
+    if(*threadsPerBlock > deviceProp->maxThreadsDim[0]){
+	throw runtime_error("Threads per block exceeds device maximum.");
+    }
+    if(*numBlocks > deviceProp->maxGridSize[0]){
+	throw runtime_error("Grid size exceeds device maximum.");
     }
 }
 
