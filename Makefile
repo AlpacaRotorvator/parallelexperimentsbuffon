@@ -14,10 +14,10 @@ ALL_CXXFLAGS += $(addprefix -Xcompiler ,$(CXXFLAGS))
 ALL_LDFLAGS := $(ALL_CXXFLAGS)
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 
-CUDART_DIR := /opt/cuda
+CUDART_DIR := /usr/local/cuda
 
 # Gencode arguments
-SMS ?= 30
+SMS ?= 20 30
 
 ifeq ($(GENCODE_FLAGS),)
 # Generate SASS code for each SM architecture listed in $(SMS)
